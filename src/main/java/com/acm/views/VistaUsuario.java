@@ -20,7 +20,7 @@ public  class VistaUsuario extends Layout {
     }
 
     public int ingresar(){
-        imprimir("1. ingresar como admin\n2. ingresar como cliente");
+        imprimir("1. ingresar como admin\n2. ingresar como cliente\n\nSi no está registrado, ingrese 0");
         return digitarOpcion();
     }
 

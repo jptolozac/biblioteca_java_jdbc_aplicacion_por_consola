@@ -36,10 +36,10 @@ public class ClienteDAO extends Conexion implements IClienteDAO {
         try {
             PreparedStatement stmt = con.prepareStatement(sentencia);
             stmt.setString(1, cliente.getCedula());
-            stmt.setString(1, cliente.getNombre());
-            stmt.setString(1, cliente.getCorreo());
-            stmt.setString(1, cliente.getTelefono());
-            stmt.setDouble(1, cliente.getEstadoDeCuenta());
+            stmt.setString(2, cliente.getNombre());
+            stmt.setString(3, cliente.getCorreo());
+            stmt.setString(4, cliente.getTelefono());
+            stmt.setDouble(5, cliente.getEstadoDeCuenta());
             return stmt.execute();
         } catch (Exception e) {
             e.printStackTrace();
@@ -64,7 +64,7 @@ public class ClienteDAO extends Conexion implements IClienteDAO {
 
     @Override
     public void crearTabla() {
-        String sentencia = "CREATE TABLE IF NOT EXISTS cliente (cedula VARCHAR(11) NOT NULL PRIMARY KEY, nombre VARCHAR(50), correo VARCHAR(60), telefono VARCHAR(15), estado_cuenta DOUBLE)";
+        String sentencia = "CREATE TABLE IF NOT EXISTS cliente (cedula VARCHAR(11) NOT NULL PRIMARY KEY, nombre VARCHAR(50), correo VARCHAR(60), telefono VARCHAR(15), estado_cuenta DOUBLE DEFAULT 0)";
         try(PreparedStatement stmt = con.prepareStatement(sentencia)) {
             stmt.execute();
         } catch (Exception e) {

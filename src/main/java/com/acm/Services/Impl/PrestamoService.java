@@ -42,10 +42,12 @@ public class PrestamoService implements IPrestamoService{
     @Override
     public void crearTabla() {
         prestamoDAO.crearTabla();
+        prestamoLibroDAO.crearTabla();
     }
 
     @Override
     public void eliminarTabla() {
+        prestamoLibroDAO.eliminarTabla();
         prestamoDAO.eliminarTabla();
     }
     

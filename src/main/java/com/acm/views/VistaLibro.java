@@ -9,13 +9,13 @@ public class VistaLibro extends Layout{
         System.out.println("Digite el valor de " + valor);
         return digitarTexto();
     }
-    public static void libroSinResultados(){
+    public void libroSinResultados(){
         System.out.println("No se encuentra el libro elegido");
     }
-    public static void exito(){
+    public void exito(){
         System.out.println("Operación exitosa!");
     }
-    public static void libroRepetido(){
+    public void libroRepetido(){
         System.out.println("Libro ya elegido, no se puede pedir nuevamente");
     }
 }

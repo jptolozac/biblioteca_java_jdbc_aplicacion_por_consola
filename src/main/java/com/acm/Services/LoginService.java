@@ -2,6 +2,7 @@ package com.acm.Services;
 
 import java.sql.SQLException;
 
+import com.acm.Services.Impl.ClienteService;
 import com.acm.model.Cliente;
 import com.acm.repository.IClienteDAO;
 import com.acm.repository.ILibroDAO;
@@ -11,29 +12,42 @@ import com.acm.repository.Impl.LibroDAO;
 public class LoginService {
     private String ADMINUSERNAME = "1234";
     private String username;
+    public int REGISTRAR_CLIENTE = 0;
     public int ADMIN = 1;
     public int CLIENTE = 2;
 
     
-    public int ingresar(int opc, String username){
+    public int ingresar(int opc, String username, Cliente cliente){
         // VistaUsuario usuario = null;
-        if(opc == 1){
-            if(ADMINUSERNAME.equals(username)){
-                return ADMIN;
-            } 
-        }
-        if(opc == 2){
-            try {
-                IClienteDAO clienteDAO = new ClienteDAO();
-                Cliente clienteBuscado = clienteDAO.get(username);
-                if(clienteBuscado != null){
-                    this.username = username;
-                    return CLIENTE;
+        switch (opc) {
+            case 0:{
+                IClienteService clienteService = new ClienteService();
+                clienteService.agregar(cliente);
+                this.username = username;
+                return CLIENTE;
+            } //break;
+            case 1:{
+                if(ADMINUSERNAME.equals(username)){
+                    return ADMIN;
+                } 
+            }break;
+            case 2:{
+                try {
+                    IClienteDAO clienteDAO = new ClienteDAO();
+                    Cliente clienteBuscado = clienteDAO.get(username);
+                    if(clienteBuscado != null){
+                        this.username = username;
+                        return CLIENTE;
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            }break;
+        
+            default:
+                break;
         }
+
         return 0;
     }
     public static boolean validarExistenciaLibros(){

@@ -33,4 +33,7 @@ public class Layout {
     public void opcionInvalida(){
         imprimir("Opción inválida");
     }
+    public void imprimirLinea(String linea){
+        System.out.println(linea);
+    }
 }

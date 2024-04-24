@@ -14,6 +14,7 @@ import com.acm.Services.IPrestamoService;
 import com.acm.Services.LoginService;
 import com.acm.Services.Impl.AutorService;
 import com.acm.Services.Impl.CategoriaService;
+import com.acm.Services.Impl.ClienteService;
 import com.acm.Services.Impl.LibroService;
 import com.acm.Services.Impl.PrestamoService;
 import com.acm.model.Autor;
@@ -26,26 +27,26 @@ import com.acm.views.VistaLibro;
 import com.acm.views.VistaUsuario;
 
 public class App {
-    public static void cargaLibros() {
-        ILibroService libroService = new LibroService();
-        VistaLibro vwLibro = new VistaLibro();
+    private static ILibroService libroService = new LibroService();
+    private static ICategoriaService categoriaService = new CategoriaService();
+    private static IAutorService autorService = new AutorService();
+    private static IClienteService clienteService = new ClienteService();
+    private static IPrestamoService prestamoService = new PrestamoService();
 
-        do{
+    private static VistaLibro vwLibro = new VistaLibro();
+
+    public static void cargaLibros() {
+        do {
             Libro libro = editarLibro();
             try {
                 libroService.agregar(libro);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }while (vwLibro.agregarLibro());
+        } while (vwLibro.agregarLibro());
     }
 
     public static Libro editarLibro() {
-        IAutorService autorService = new AutorService();
-        ICategoriaService categoriaService = new CategoriaService();
-
-        VistaLibro vwLibro = new VistaLibro();
-
         String imprimirAutores = "Seleccione el autor:\n";
         String imprimirCategorias = "Seleccione la categoria:\n";
 
@@ -53,7 +54,7 @@ public class App {
         for (Autor autor : autores) {
             imprimirAutores += autor.toString();
         }
-        int opcCrear = (autores.get(autores.size() - 1).getId() + 1);
+        int opcCrear = autores.size() > 0 ? (autores.get(autores.size() - 1).getId() + 1) : 1;
         imprimirAutores += opcCrear + ". crear nuevo autor";
         int opcion = 0;
         Autor autor = null;
@@ -76,7 +77,7 @@ public class App {
         for (Categoria categoria : categorias) {
             imprimirCategorias += categoria.toString();
         }
-        opcCrear = (categorias.get(categorias.size() - 1).getId() + 1);
+        opcCrear = categorias.size() > 0 ? (categorias.get(categorias.size() - 1).getId() + 1) : 1;
         imprimirCategorias += opcCrear + ". crear nueva categoria";
         opcion = 0;
         Categoria categoria = null;
@@ -105,13 +106,20 @@ public class App {
         int ingresa = 0;
         do {
             VistaUsuario vwUsuario = new VistaUsuario();
-            ingresa = loginService.ingresar(vwUsuario.ingresar(), vwUsuario.getNombreUsuario());
+            int opcIngreso = vwUsuario.ingresar();
+            Cliente cliente = null;
+            if(opcIngreso == loginService.REGISTRAR_CLIENTE){
+                String[] datos = VistaCliente.pedirDatos();
+                cliente = new Cliente(datos[0], datos[1], datos[2], datos[3], Double.parseDouble(datos[4]));
+            }
+            String username = vwUsuario.getNombreUsuario();
+            
+            ingresa = loginService.ingresar(opcIngreso, username, cliente);
             System.out.println("ingresa: " + ingresa);
-        } while (ingresa != loginService.ADMIN && ingresa != loginService.CLIENTE);
+        } while (ingresa != loginService.ADMIN && ingresa != loginService.CLIENTE && ingresa != loginService.REGISTRAR_CLIENTE);
 
         if (ingresa == loginService.ADMIN) {
             VistaAdmin vwUsuario = new VistaAdmin();
-            ILibroService libroService = new LibroService();
             switch (vwUsuario.Menu()) {
                 case 1: {
                     cargaLibros();
@@ -129,9 +137,9 @@ public class App {
                         Libro libroEditado = editarLibro();
                         libroEditado.setId(libroSinEditar.getId());
                         libroService.actualizar(libroEditado);
-                        VistaLibro.exito();
+                        vwLibro.exito();
                     } else {
-                        VistaLibro.libroSinResultados();
+                        vwLibro.libroSinResultados();
                     }
                 }
                     break;
@@ -150,12 +158,11 @@ public class App {
                     break;
             }
 
-        } else if(ingresa == loginService.CLIENTE) {
+        } else if (ingresa == loginService.CLIENTE) {
             VistaCliente vwUsuario = new VistaCliente();
-            Cliente cliente = IClienteService.get(loginService.getUsername());
-            System.out.println("Cliente: " + cliente);
+            Cliente cliente = clienteService.get(loginService.getUsername());
+            // System.out.println("Cliente: " + cliente);
             System.out.println("Username: " + loginService.getUsername());
-            ILibroService libroService = new LibroService();
             switch (vwUsuario.Menu()) {
                 case 1: {
                     List<Libro> libros = libroService.listar();
@@ -171,22 +178,21 @@ public class App {
                         Libro libroElegido = libros.get(eleccion);
                         if (libroElegido.getDisponibilidad() > 0) {
                             boolean repetido = false;
-                            for(Libro libro : librosElegidos){
-                                if(libro.equals(libroElegido)){
-                                    VistaLibro.libroRepetido();
+                            for (Libro libro : librosElegidos) {
+                                if (libro.equals(libroElegido)) {
+                                    vwLibro.libroRepetido();
                                     repetido = true;
                                 }
                             }
-                            if(repetido)
+                            if (repetido)
                                 continue;
 
                             libroElegido.setDisponibilidad(libroElegido.getDisponibilidad() - 1);
-                            
+
                             librosElegidos.add(libroElegido);
                         }
                     } while (vwUsuario.pedirOtroLibro());
-                    IPrestamoService prestamo = new PrestamoService();
-                    prestamo.pedir(librosElegidos, cliente, Date.valueOf(fechaFinPrestamo));
+                    prestamoService.pedir(librosElegidos, cliente, Date.valueOf(fechaFinPrestamo));
                 }
                     break;
                 default:
@@ -197,12 +203,26 @@ public class App {
     }
 
     public static void main(String[] args) {
+        libroService.crearTabla();
+        clienteService.crearTabla();
+        prestamoService.crearTabla();
+
         VistaUsuario vwUsuario = new VistaUsuario();
         if (LoginService.validarExistenciaLibros()) {
             if (!vwUsuario.continuar()) {
+                prestamoService.eliminarTabla();
+                libroService.eliminarTabla();
+                // clienteService.eliminarTabla();
+
+                libroService.crearTabla();
+                clienteService.crearTabla();
+                prestamoService.crearTabla();
+                
+                vwLibro.imprimirLinea("No hay libros registrados, por favor registre alguno para continuar");
                 cargaLibros();
             }
         } else {
+            vwLibro.imprimirLinea("No hay libros registrados, por favor registre alguno para continuar");
             cargaLibros();
         }
 

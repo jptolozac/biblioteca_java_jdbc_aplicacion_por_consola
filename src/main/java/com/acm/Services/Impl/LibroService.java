@@ -36,8 +36,8 @@ public class LibroService implements ILibroService{
     public boolean agregar(Libro libro) throws SQLException {
         if(libro != null && libro.getCategoria() != null && libro.getAutor() != null){
             try {
-                autorService.agregar(libro.getAutor());
-                categoriaService.agregar(libro.getCategoria());
+                // autorService.agregar(libro.getAutor());
+                // categoriaService.agregar(libro.getCategoria());
                 libroDAO.agregar(libro);
                 return true;
             } catch (Exception e) {
@@ -72,9 +72,9 @@ public class LibroService implements ILibroService{
 
     @Override
     public void eliminarTabla() {
+        libroDAO.eliminarTabla();
         autorService.eliminarTabla();
         categoriaService.eliminarTabla();
-        libroDAO.eliminarTabla();
     }
     
 }
