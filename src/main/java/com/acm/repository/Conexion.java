@@ -5,13 +5,14 @@ import java.sql.DriverManager;
 
 public class Conexion {
     protected static final String DRIVER = "org.h2.Driver";
-    protected static final String URL = "jdbc:h2:tcp://localhost/~/test";
+    protected static final String URL = "jdbc:h2:" + System.getProperty("user.dir") + "\\biblioteca"; // archivo servidor almacenado en el usuario: "jdbc:h2:tcp://localhost/~/test"
     protected static final String USER = "sa";
     protected static final String PASS = "";
 
     protected Connection con;
 
     public Conexion() {
+        // System.out.println("Current path: " + URL);
         try {
             getConexion();
         } catch (Exception e) {
